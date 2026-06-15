@@ -13,10 +13,11 @@ this repository contains the simulations and the figures that accompany it.
 | Path | Description |
 | --- | --- |
 | `src/sde.py` | Scalar SDE toolkit: Brownian motion, Euler–Maruyama, the OU and GBM test equations, and strong/weak convergence diagnostics. |
-| `src/heat.py` | Stochastic heat equation solvers: an explicit finite-difference scheme and the spectral (sine-basis) method. |
+| `src/heat.py` | Stochastic heat equation solvers: an explicit finite-difference scheme, the spectral (sine-basis) method, and the per-mode noise-variance helpers used in the statistical study. |
 | `notebooks/01_sde_foundations.ipynb` | Brownian motion and the test SDEs (report §3–4). |
 | `notebooks/02_em_convergence.ipynb` | Strong and weak convergence of Euler–Maruyama (report §4.1, §12). |
 | `notebooks/03_stochastic_heat.ipynb` | Simulation of the stochastic heat equation (report §11). |
+| `notebooks/04_statistical_analysis.ipynb` | Statistical analysis of the spectral solution: Monte-Carlo mean and ±1, ±2 standard-deviation bands of $u(x)$, plus an exact-vs-naive noise-covariance comparison (report §11). |
 | `figures/` | Figures produced by the notebooks. |
 
 ## Setup

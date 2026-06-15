@@ -73,3 +73,47 @@ def heat_spectral(u0, T, Nt, Nx, K_modes, rng, d, var, g, Q):
              for k in range(K_modes)]
         u[n] = idst(a, n=Nx + 1, type=1, norm='ortho')
     return X, Y, u
+
+
+def ou_step_variance(K, d, dt, var):
+    """Exact one-step Ornstein-Uhlenbeck noise variance for each of K modes (Q = I).
+
+    Integrating the modal SDE exactly over a step of length dt gives mode k the
+    increment variance var * (1 - exp(-2 lam_k dt)) / (2 lam_k), with
+    lam_k = d (k pi)^2, rather than the flat var * dt used by heat_spectral.
+    """
+    k = np.arange(1, K + 1)
+    lam = d * (k * np.pi) ** 2
+    return var * (1.0 - np.exp(-2.0 * lam * dt)) / (2.0 * lam)
+
+
+def flat_step_variance(K, d, dt, var):
+    """Naive flat per-mode variance var * dt (ignores the within-step decay)."""
+    return var * dt * np.ones(K)
+
+
+def heat_spectral_diag(u0, T, Nt, Nx, rng, K_modes, d, g, var_diag):
+    """Spectral solver driven by a diagonal per-mode variance vector.
+
+    Like heat_spectral, but the modal noise is independent across modes with the
+    variances supplied in var_diag (length K_modes). Innovations are drawn as
+    standard normals scaled by sqrt(var_diag), so two variance choices sharing a
+    seed are compared on matched noise. Returns X, Y over (time, space) and u.
+    """
+    dt = T / Nt
+    t_grid = np.linspace(0, T, Nt)
+    x_grid = np.linspace(0, 1, Nx + 1)
+    X, Y = np.meshgrid(t_grid, x_grid)
+
+    k = np.arange(1, K_modes + 1)
+    decay = np.exp(-d * (k * np.pi) ** 2 * dt)
+    std = np.sqrt(var_diag)
+
+    u = np.zeros((Nt, Nx + 1))
+    u[0] = [u0(j / Nx) for j in range(Nx + 1)]
+    a = dst(u[0], n=K_modes, type=1, norm='ortho')
+    for n in range(1, Nt):
+        w = rng.standard_normal(K_modes) * std   # matched innovations under a fixed seed
+        a = a * decay + g((n - 1) * dt) * w
+        u[n] = idst(a, n=Nx + 1, type=1, norm='ortho')
+    return X, Y, u
